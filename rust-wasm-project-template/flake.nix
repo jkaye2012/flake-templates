@@ -25,13 +25,14 @@
               pkgs.mkShell {
                 name = "replace-me";
 
-                packages = [
+                packages = with pkgs; [
                   f
-                  pkgs.linuxPackages_latest.perf
-                  pkgs.lldb
-                  pkgs.llvmPackages.bintools
-                  pkgs.nodejs_21
-                  pkgs.wasm-pack
+                  linuxPackages_latest.perf
+                  lldb
+                  llvmPackages.bintools
+                  nodePackages.typescript-language-server
+                  nodejs_21
+                  wasm-pack
                 ];
 
                 CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_LINKER = "lld";
