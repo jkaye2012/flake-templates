@@ -32,6 +32,7 @@
                   llvmPackages.bintools
                   nodePackages.typescript-language-server
                   nodejs_21
+                  vscode-langservers-extracted
                   wasm-pack
                 ];
 
