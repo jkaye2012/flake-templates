@@ -3,30 +3,38 @@
 
   inputs = {
     fenix = {
-      url = "github:nix-community/fenix";
+      url = "github:nix-community/fenix/monthly";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "nixpkgs/nixos-23.11";
-    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "nixpkgs/nixos-24.05";
+    devenv.url = "github:jkaye2012/devenv";
   };
 
-  outputs = { self, fenix, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem
-      (system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-          f = fenix.packages.${system};
-        in
-          {
-            devShells.default = 
-              pkgs.mkShell {
-                name = "replace-me";
-                packages = [
-                  f.stable.toolchain
-                  pkgs.linuxPackages_latest.perf
-                  pkgs.lldb
-                ];
-              };
-          }
-      );
+  outputs =
+    {
+      self,
+      fenix,
+      nixpkgs,
+      devenv,
+    }:
+    devenv.lib.forAllSystems nixpkgs (
+      system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+        f = fenix.packages.${system};
+      in
+      {
+        devShells.${system}.default = pkgs.mkShell {
+          name = "replace-me";
+
+          inputsFrom = [ devenv.devShells.${system}.default ];
+
+          packages = with pkgs; [
+            f.complete.toolchain
+            linuxPackages_latest.perf
+            lldb
+          ];
+        };
+      }
+    );
 }
