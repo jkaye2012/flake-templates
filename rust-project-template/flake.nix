@@ -22,10 +22,11 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         f = fenix.packages.${system};
+        manifest = (pkgs.lib.importTOML ./Cargo.toml).package;
       in
       {
         devShells.${system}.default = pkgs.mkShell {
-          name = "replace-me";
+          inherit (manifest) name;
 
           inputsFrom = [ devenv.devShells.${system}.default ];
 
@@ -34,6 +35,14 @@
             linuxPackages_latest.perf
             lldb
           ];
+        };
+
+        packages.${system}.default = pkgs.rustPlatform.buildRustPackage {
+          inherit (manifest) version;
+
+          pname = manifest.name;
+          cargoLock.lockFile = ./Cargo.lock;
+          src = pkgs.nix-gitignore.gitignoreSource [ ] ./.;
         };
       }
     );
