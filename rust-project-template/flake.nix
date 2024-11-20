@@ -8,6 +8,7 @@
     };
     nixpkgs.url = "nixpkgs/nixos-24.05";
     devenv.url = "github:jkaye2012/devenv";
+    naersk.url = "github:nix-community/naersk";
   };
 
   outputs =
@@ -16,12 +17,17 @@
       fenix,
       nixpkgs,
       devenv,
+      naersk,
     }:
     devenv.lib.forAllSystems nixpkgs (
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        f = fenix.packages.${system};
+        fenix' = fenix.packages.${system};
+        naersk' = pkgs.callPackage naersk {
+          cargo = fenix'.complete.toolchain;
+          rustc = fenix'.complete.toolchain;
+        };
         manifest = (pkgs.lib.importTOML ./Cargo.toml).package;
       in
       {
@@ -31,17 +37,13 @@
           inputsFrom = [ devenv.devShells.${system}.default ];
 
           packages = with pkgs; [
-            f.complete.toolchain
+            fenix'.complete.toolchain
             linuxPackages_latest.perf
             lldb
           ];
         };
 
-        packages.${system}.default = pkgs.rustPlatform.buildRustPackage {
-          inherit (manifest) version;
-
-          pname = manifest.name;
-          cargoLock.lockFile = ./Cargo.lock;
+        packages.${system}.default = naersk'.buildPackage {
           src = pkgs.nix-gitignore.gitignoreSource [ ] ./.;
         };
       }
