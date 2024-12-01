@@ -2,13 +2,19 @@
   description = "Replace me";
 
   inputs = {
+    nixpkgs.url = "nixpkgs/nixos-24.05";
     fenix = {
       url = "github:nix-community/fenix/monthly";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "nixpkgs/nixos-24.05";
-    devenv.url = "github:jkaye2012/devenv";
-    naersk.url = "github:nix-community/naersk";
+    devenv = {
+      url = "github:jkaye2012/devenv";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    naersk = {
+      url = "github:nix-community/naersk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
